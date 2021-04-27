@@ -13,15 +13,15 @@ namespace CAI.Ejercicio52Guia
 
         static void Main(string[] args)
         {
-            Console.WriteLine("a. Alta");
-            Console.WriteLine("b. Baja");
-            Console.WriteLine("g. Grabar archivo");
-            Console.WriteLine("l. Leer de archivo");
-            Console.WriteLine("s. Terminar");
-
             while (true)
             {
-                var tecla = Console.ReadKey();
+                Console.WriteLine("a. Alta");
+                Console.WriteLine("b. Baja");
+                Console.WriteLine("g. Grabar archivo");
+                Console.WriteLine("l. Leer de archivo");
+                Console.WriteLine("s. Terminar");
+
+                var tecla = Console.ReadKey(intercept: true);
                 if (tecla.Key == ConsoleKey.A)
                 {
                     Alta();
@@ -46,10 +46,11 @@ namespace CAI.Ejercicio52Guia
                 {
                     Console.WriteLine("No es una opción de la lista.");
                 }
+                Console.WriteLine();
             }
 
-
-            Console.ReadKey();
+            Console.WriteLine("El ejercicio ha finalizado.");
+            Console.ReadKey(intercept: true);
         }
 
         private static void Leer()
@@ -66,6 +67,8 @@ namespace CAI.Ejercicio52Guia
             }
             while (!File.Exists(ruta));
 
+            int cantidadPersonasNuevas = 0;
+            int personasActualizadas = 0;
             using (var archivo = File.OpenRead(ruta))
             {
                 using (var reader = new StreamReader(archivo))
@@ -74,10 +77,22 @@ namespace CAI.Ejercicio52Guia
                     {
                         var linea = reader.ReadLine();
                         var persona = Persona.Parse(linea);
-                        personas.Add(persona.Legajo, persona);
+                        if (personas.ContainsKey(persona.Legajo))
+                        {
+                            personas[persona.Legajo] = persona;
+                            personasActualizadas++;
+                        }
+                        else
+                        {
+                            personas.Add(persona.Legajo, persona);
+                            cantidadPersonasNuevas++;
+                            Console.WriteLine($"Nueva persona: {persona.Nombre} ({persona.Legajo})");
+                        }
                     }
                 }
             }
+
+            Console.WriteLine($"Se han dado de alta {cantidadPersonasNuevas}, {personasActualizadas} actualizadas.");
         }
 
         private static void Grabar()
@@ -87,27 +102,26 @@ namespace CAI.Ejercicio52Guia
             if (File.Exists(ruta))
             {
                 Console.WriteLine("El archivo ya existe. Desea sobreescribirlo?");
-                if (Console.ReadKey().Key == ConsoleKey.S)
+                if (Console.ReadKey(intercept: true).Key == ConsoleKey.S)
                 {
                     File.Delete(ruta);
                 }
             }
 
-            using (var archivoStream = File.OpenWrite(ruta))
+            using (var writer = File.AppendText(ruta))
             {
-                using (var writer = new StreamWriter(archivoStream))
+                foreach (var persona in personas)
                 {
-                    foreach (var persona in personas)
-                    {
-                        writer.WriteLine($"{persona.Value.Legajo}|{persona.Value.Nombre}");
-                    }
+                    writer.WriteLine($"{persona.Value.Legajo}|{persona.Value.Nombre}");
                 }
             }
+
+            Console.WriteLine("Los datos han sido grabados exitosamente.");
         }
 
         private static void Baja()
         {
-            throw new NotImplementedException();
+            Console.WriteLine("No implementado!");
         }
 
         private static void Alta()
@@ -123,8 +137,9 @@ namespace CAI.Ejercicio52Guia
                 else
                 {
                     personas.Add(persona.Legajo, persona);
+                    Console.WriteLine($"Se ha creado la persona {persona.Legajo}: {persona.Nombre}");
                     Console.WriteLine("Desea ingresar otro [S/N]?");
-                    var tecla = Console.ReadKey();
+                    var tecla = Console.ReadKey(intercept: true);
                     seguir = tecla.Key == ConsoleKey.S;
                 }
             }

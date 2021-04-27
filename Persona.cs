@@ -48,7 +48,7 @@ namespace CAI.Ejercicio52Guia
 
                 if (string.IsNullOrWhiteSpace(nombre))
                 {
-                    Console.WriteLine("Ingrese un nombre.");
+                    Console.WriteLine("No pueden ser sólo espacios en blanco.");
                     continue;
                 }
 
